@@ -1,0 +1,16 @@
+ydata-profiling
+pandas
+numpy
+seaborn
+flask
+scikit-learn
+ipykernel
+ipywidgets
+pymongo
+boto3
+datetime
+dataclasses
+pyyaml
+flask
+pytest-shutil
+-e .
