@@ -56,24 +56,36 @@ class PredictionPipeline:
         except Exception as e:
             raise CustomException(e, sys)
 
+
+    # Inside PredictionPipeline class
+    def run_pipeline(self):
+        try:
+            logging.info("Running prediction pipeline")
+            input_csv_path = self.save_input_files()
+            
+            # Ensure proper file path for prediction file
+            prediction_file_detail = self.get_predicted_dataframe(input_csv_path)
+
+            return prediction_file_detail  # Return the prediction file details
+        except Exception as e:
+            raise CustomException(e, sys)
+
     def get_predicted_dataframe(self, input_dataframe_path: str):
         try:
             logging.info("Predicting...")
             prediction_column_name: str = "TARGET_COLUMN"  
+
             # Check if the file exists
             if not os.path.exists(input_dataframe_path):
                 raise FileNotFoundError(f"The file '{input_dataframe_path}' does not exist.")
 
             input_dataframe: pd.DataFrame = pd.read_csv(input_dataframe_path)
 
-            # Drop the 'Unnamed: 0' column if it exists
-            # input_dataframe = input_dataframe.drop(columns="Unnamed: 0", errors='ignore')
-
             # Your existing logic for predictions
             predictions = self.predict(input_dataframe)
 
             # Add predictions to the DataFrame
-            input_dataframe[prediction_column_name] = [pred for pred in predictions]
+            input_dataframe[prediction_column_name] = predictions  # directly assigning predictions
 
             # Mapping for target column
             target_column_mapping = {0: 'Bad', 1: 'Good'}
@@ -83,24 +95,73 @@ class PredictionPipeline:
             os.makedirs(self.prediction_pipeline_config.prediction_output_dirname, exist_ok=True)
 
             # Save the DataFrame to CSV
-            input_dataframe.to_csv(self.prediction_pipeline_config.prediction_file_path, index=False)
+            prediction_file_path = os.path.join(self.prediction_pipeline_config.prediction_output_dirname, 
+                                                self.prediction_pipeline_config.prediction_file_name)
+            input_dataframe.to_csv(prediction_file_path, index=False)  # Save the predicted DataFrame
+
             logging.info("Predictions completed.")
+
+            # Return the details of the predicted file
+            return {
+                'prediction_file_path': prediction_file_path,
+                'prediction_file_name': self.prediction_pipeline_config.prediction_file_name
+            }
 
         except FileNotFoundError as e:
             raise CustomException(f"Error: {e}", sys)
         except Exception as e:
             raise CustomException(f"Unexpected error: {e}", sys) from e
 
-    def run_pipeline(self):
-        try:
-            logging.info("Running prediction pipeline")
-            input_csv_path = self.save_input_files()
+
+9
+
+
+
+    # def get_predicted_dataframe(self, input_dataframe_path: str):
+    #     try:
+    #         logging.info("Predicting...")
+    #         prediction_column_name: str = "TARGET_COLUMN"  
+    #         # Check if the file exists
+    #         if not os.path.exists(input_dataframe_path):
+    #             raise FileNotFoundError(f"The file '{input_dataframe_path}' does not exist.")
+
+    #         input_dataframe: pd.DataFrame = pd.read_csv(input_dataframe_path)
+
+    #         # Drop the 'Unnamed: 0' column if it exists
+    #         # input_dataframe = input_dataframe.drop(columns="Unnamed: 0", errors='ignore')
+
+    #         # Your existing logic for predictions
+    #         predictions = self.predict(input_dataframe)
+
+    #         # Add predictions to the DataFrame
+    #         input_dataframe[prediction_column_name] = [pred for pred in predictions]
+
+    #         # Mapping for target column
+    #         target_column_mapping = {0: 'Bad', 1: 'Good'}
+    #         input_dataframe[prediction_column_name] = input_dataframe[prediction_column_name].map(target_column_mapping)
+
+    #         # Ensure the output directory exists
+    #         os.makedirs(self.prediction_pipeline_config.prediction_output_dirname, exist_ok=True)
+
+    #         # Save the DataFrame to CSV
+    #         input_dataframe.to_csv(self.prediction_pipeline_config.prediction_file_path, index=False)
+    #         logging.info("Predictions completed.")
+
+    #     except FileNotFoundError as e:
+    #         raise CustomException(f"Error: {e}", sys)
+    #     except Exception as e:
+    #         raise CustomException(f"Unexpected error: {e}", sys) from e
+
+    # def run_pipeline(self):
+    #     try:
+    #         logging.info("Running prediction pipeline")
+    #         input_csv_path = self.save_input_files()
             
-            # Use shutil.rmtree to remove the directory along with its contents
-            # shutil.rmtree("prediction_artifacts", ignore_errors=True)
+    #         # Use shutil.rmtree to remove the directory along with its contents
+    #         # shutil.rmtree("prediction_artifacts", ignore_errors=True)
 
-            self.get_predicted_dataframe(input_csv_path)
+    #         self.get_predicted_dataframe(input_csv_path)
 
-            return self.prediction_pipeline_config
-        except Exception as e:
-            raise CustomException(e, sys)
+    #         return self.prediction_pipeline_config
+    #     except Exception as e:
+    #         raise CustomException(e, sys)

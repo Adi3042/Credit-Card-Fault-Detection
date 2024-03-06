@@ -6,12 +6,24 @@
   <title>Loading Page</title>
   <link rel="stylesheet" href="/static/css/train.css">
 </head>
-<body>
+<body onload="startTraining()">
   <div class="loading-container">
     <div class="loading-text">Training Model 🛠️</div>
     <div class="loader">⏳</div>
   </div>
 
-  <script src="script.js"></script>
+  <script>
+  function startTraining() {
+    fetch('/start_training', {
+        method: 'POST',
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            window.location.href = '/upload';
+        }
+    });
+  }
+  </script>
 </body>
 </html>
